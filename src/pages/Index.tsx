@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Language, t } from '@/lib/translations';
 import LanguageToggle from '@/components/LanguageToggle';
 import InvoiceForm from '@/components/InvoiceForm';
@@ -33,6 +33,8 @@ const Index = () => {
   const [notes, setNotes] = useState('');
   const [showHistory, setShowHistory] = useState(false);
   const [historyRefresh, setHistoryRefresh] = useState(0);
+  const [previewScale, setPreviewScale] = useState(1);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     localStorage.setItem(BILL_NO_KEY, String(billNo));
@@ -42,6 +44,25 @@ const Index = () => {
     const handler = () => setHistoryRefresh(p => p + 1);
     window.addEventListener('history-updated', handler);
     return () => window.removeEventListener('history-updated', handler);
+  }, []);
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (previewContainerRef.current) {
+        const width = previewContainerRef.current.clientWidth;
+        // 210mm is approximately 794px
+        if (width < 794) {
+          setPreviewScale(width / 794);
+        } else {
+          setPreviewScale(1);
+        }
+      }
+    };
+    
+    // Initial scale and listener
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
   }, []);
 
   const computeGrandTotal = useCallback(() => {
@@ -161,17 +182,17 @@ const Index = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
               <button onClick={handleDownloadPdf}
-                className="flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity shadow-md">
+                className="flex flex-1 items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity shadow-md">
                 <Download className="w-4 h-4" /> {t('downloadPdf', language)}
               </button>
               <button onClick={handlePrint}
-                className="flex items-center gap-2 bg-secondary text-secondary-foreground px-5 py-2.5 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity">
+                className="flex flex-1 items-center justify-center gap-2 bg-secondary text-secondary-foreground px-5 py-2.5 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity">
                 <Printer className="w-4 h-4" /> {t('printInvoice', language)}
               </button>
               <button onClick={handleNewBill}
-                className="flex items-center gap-2 border border-accent text-accent px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-accent/10 transition-colors ml-auto">
+                className="flex items-center justify-center w-full sm:w-auto gap-2 border border-accent text-accent px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-accent/10 transition-colors sm:ml-auto">
                 <FilePlus className="w-4 h-4" /> {t('newBill', language)}
               </button>
             </div>
@@ -198,19 +219,32 @@ const Index = () => {
           {/* Right: Live Preview */}
           <div className="space-y-2">
             <h2 className="text-lg font-semibold text-foreground">{t('livePreview', language)}</h2>
-            <div className="overflow-auto rounded-xl border border-border shadow-lg bg-muted/30 p-4">
-              <InvoicePreview
-                language={language}
-                customerName={customerName}
-                customerAddress={customerAddress}
-                customerPhone={customerPhone}
-                billDate={billDate}
-                billNo={billNo}
-                items={items}
-                gstEnabled={gstEnabled}
-                gstPercent={gstPercent}
-                notes={notes}
-              />
+            <div 
+              ref={previewContainerRef}
+              className="rounded-xl border border-border shadow-lg bg-muted/30 p-2 sm:p-4 overflow-hidden flex justify-center"
+            >
+              <div 
+                style={{ 
+                  transform: `scale(${previewScale})`, 
+                  transformOrigin: 'top center',
+                  // The original A4 height is 297mm (approx 1122px)
+                  // We collapse the container height based on scale to avoid whitespace at the bottom
+                  marginBottom: previewScale < 1 ? `calc(-297mm * ${1 - previewScale})` : 0 
+                }}
+              >
+                <InvoicePreview
+                  language={language}
+                  customerName={customerName}
+                  customerAddress={customerAddress}
+                  customerPhone={customerPhone}
+                  billDate={billDate}
+                  billNo={billNo}
+                  items={items}
+                  gstEnabled={gstEnabled}
+                  gstPercent={gstPercent}
+                  notes={notes}
+                />
+              </div>
             </div>
           </div>
         </div>

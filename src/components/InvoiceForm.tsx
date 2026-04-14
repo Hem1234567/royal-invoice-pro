@@ -54,7 +54,7 @@ const InvoiceForm = ({
           <input className={inputClass} value={customerName} onChange={e => setCustomerName(e.target.value)}
             placeholder={t('customerName', language)} />
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-sm font-medium text-foreground mb-1 block">{t('customerAddress', language)}</label>
             <input className={inputClass} value={customerAddress} onChange={e => setCustomerAddress(e.target.value)} />
@@ -64,7 +64,7 @@ const InvoiceForm = ({
             <input className={inputClass} value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-sm font-medium text-foreground mb-1 block">{t('date', language)}</label>
             <input type="date" className={inputClass} value={billDate} onChange={e => setBillDate(e.target.value)} />
@@ -81,38 +81,49 @@ const InvoiceForm = ({
         <h3 className="text-sm font-semibold text-foreground mb-2">{t('particulars', language)}</h3>
         <div className="space-y-2">
           {items.map((item, idx) => (
-            <div key={item.id} className="flex gap-2 items-start bg-muted/50 rounded-lg p-2">
-              <span className="text-xs text-muted-foreground mt-2.5 w-6 shrink-0">{idx + 1}.</span>
-              <input
-                className="flex-1 min-w-0 rounded-md border border-input bg-card px-2 py-1.5 text-sm"
-                placeholder={t('particulars', language)}
-                value={item.particulars}
-                onChange={e => updateItem(item.id, 'particulars', e.target.value)}
-              />
-              <input
-                type="number"
-                className="w-16 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
-                placeholder={t('qty', language)}
-                value={item.qty || ''}
-                onChange={e => updateItem(item.id, 'qty', Number(e.target.value))}
-              />
-              <input
-                type="number"
-                className="w-24 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
-                placeholder={t('rate', language)}
-                value={item.rate || ''}
-                onChange={e => updateItem(item.id, 'rate', Number(e.target.value))}
-              />
-              <div className="w-24 text-right text-sm font-medium mt-2 text-foreground">
-                ₹{(item.qty * item.rate).toLocaleString('en-IN')}
+            <div key={item.id} className="flex flex-col gap-3 bg-muted/50 rounded-lg p-3">
+              <div className="flex items-center gap-2 w-full">
+                <span className="text-xs text-muted-foreground w-6 shrink-0">{idx + 1}.</span>
+                <input
+                  className="flex-1 min-w-0 rounded-md border border-input bg-card px-2 py-1.5 text-sm"
+                  placeholder={t('particulars', language)}
+                  value={item.particulars}
+                  onChange={e => updateItem(item.id, 'particulars', e.target.value)}
+                />
               </div>
-              <button
-                onClick={() => removeRow(item.id)}
-                className="mt-1 p-1 text-destructive hover:bg-destructive/10 rounded"
-                disabled={items.length <= 1}
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              
+              <div className="flex flex-wrap items-center justify-between gap-3 pl-8">
+                <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+                  <input
+                    type="number"
+                    className="w-16 sm:w-20 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
+                    placeholder={t('qty', language)}
+                    value={item.qty || ''}
+                    onChange={e => updateItem(item.id, 'qty', Number(e.target.value))}
+                  />
+                  <span className="text-muted-foreground text-xs font-medium px-1">×</span>
+                  <input
+                    type="number"
+                    className="w-20 sm:w-24 flex-1 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
+                    placeholder={t('rate', language)}
+                    value={item.rate || ''}
+                    onChange={e => updateItem(item.id, 'rate', Number(e.target.value))}
+                  />
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className="min-w-[80px] text-right text-sm font-bold text-foreground">
+                    ₹{(item.qty * item.rate).toLocaleString('en-IN')}
+                  </div>
+                  <button
+                    onClick={() => removeRow(item.id)}
+                    className="p-1.5 text-destructive hover:bg-destructive/10 rounded transition-colors"
+                    disabled={items.length <= 1}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -122,20 +133,21 @@ const InvoiceForm = ({
       </div>
 
       {/* GST */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
         <label className="flex items-center gap-2 text-sm cursor-pointer">
           <input type="checkbox" checked={gstEnabled} onChange={e => setGstEnabled(e.target.checked)}
-            className="rounded border-input accent-accent" />
+            className="rounded border-input accent-accent h-4 w-4" />
           {t('gstApplicable', language)}
         </label>
-        {gstEnabled && (
-          <div className="flex items-center gap-2">
+        {gstEnabled ? (
+          <div className="flex items-center gap-2 ml-6 sm:ml-0">
             <label className="text-sm text-muted-foreground">{t('gstPercent', language)}:</label>
-            <input type="number" className="w-16 rounded-md border border-input bg-card px-2 py-1 text-sm"
+            <input type="number" className="w-20 rounded-md border border-input bg-card px-2 py-1.5 text-sm"
               value={gstPercent} onChange={e => setGstPercent(Number(e.target.value))} />
           </div>
+        ) : (
+          <span className="text-xs text-muted-foreground ml-6 sm:ml-0">{t('gstNotApplicable', language)}</span>
         )}
-        {!gstEnabled && <span className="text-xs text-muted-foreground">{t('gstNotApplicable', language)}</span>}
       </div>
 
       {/* Notes */}
