@@ -70,22 +70,14 @@ const InvoiceForm = ({
           </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-muted/30 p-3 rounded-lg border border-border">
-          <label className="flex items-center gap-2 text-sm cursor-pointer whitespace-nowrap">
-            <input type="checkbox" checked={hasCustomerGst} onChange={e => setHasCustomerGst(e.target.checked)}
-              className="rounded border-input accent-accent h-4 w-4" />
-            {t('hasCustomerGst', language)}
-          </label>
-          {hasCustomerGst && (
-            <div className="flex-1 w-full ml-0 sm:ml-2">
-              <input 
-                className={inputClass} 
-                value={customerGstNo} 
-                onChange={e => setCustomerGstNo(e.target.value.toUpperCase())}
-                placeholder={t('customerGstNo', language)}
-              />
-            </div>
-          )}
+        <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">{t('customerGstNo', language)}</label>
+          <input 
+            className={inputClass} 
+            value={customerGstNo} 
+            onChange={e => setCustomerGstNo(e.target.value.toUpperCase())}
+            placeholder={t('customerGstNo', language)}
+          />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>

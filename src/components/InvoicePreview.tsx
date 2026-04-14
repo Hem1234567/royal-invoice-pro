@@ -91,7 +91,7 @@ const InvoicePreview = ({
           <p><span className="font-semibold">{t('billTo', language)}:</span> {customerName || '—'}</p>
           {customerAddress && <p className="text-muted-foreground text-xs">{customerAddress}</p>}
           {customerPhone && <p className="text-muted-foreground text-xs">Ph: {customerPhone}</p>}
-          {hasCustomerGst && customerGstNo && <p className="text-muted-foreground text-xs"><span className="font-semibold">{t('customerGstNo', language)}:</span> {customerGstNo}</p>}
+          {customerGstNo && <p className="text-muted-foreground text-xs"><span className="font-semibold">{t('customerGstNo', language)}:</span> {customerGstNo}</p>}
         </div>
         <div className="text-right space-y-1">
           <p><span className="font-semibold">{t('billNo', language)}:</span> {billNo}</p>
