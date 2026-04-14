@@ -81,9 +81,9 @@ const InvoiceForm = ({
         <h3 className="text-sm font-semibold text-foreground mb-2">{t('particulars', language)}</h3>
         <div className="space-y-2">
           {items.map((item, idx) => (
-            <div key={item.id} className="flex flex-col gap-3 bg-muted/50 rounded-lg p-3">
-              <div className="flex items-center gap-2 w-full">
-                <span className="text-xs text-muted-foreground w-6 shrink-0">{idx + 1}.</span>
+            <div key={item.id} className="flex flex-col lg:flex-row gap-3 lg:gap-2 lg:items-start bg-muted/50 rounded-lg p-3">
+              <div className="flex items-center gap-2 w-full lg:w-auto lg:flex-1">
+                <span className="text-xs text-muted-foreground w-6 shrink-0 lg:mt-2">{idx + 1}.</span>
                 <input
                   className="flex-1 min-w-0 rounded-md border border-input bg-card px-2 py-1.5 text-sm"
                   placeholder={t('particulars', language)}
@@ -92,32 +92,32 @@ const InvoiceForm = ({
                 />
               </div>
               
-              <div className="flex flex-wrap items-center justify-between gap-3 pl-8">
-                <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+              <div className="flex flex-wrap items-center justify-between gap-3 pl-8 lg:pl-0 w-full lg:w-auto lg:justify-end">
+                <div className="flex items-center gap-2 flex-1 lg:flex-none min-w-[140px] lg:min-w-0">
                   <input
                     type="number"
-                    className="w-16 sm:w-20 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
+                    className="w-16 sm:w-20 lg:w-16 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
                     placeholder={t('qty', language)}
                     value={item.qty || ''}
                     onChange={e => updateItem(item.id, 'qty', Number(e.target.value))}
                   />
-                  <span className="text-muted-foreground text-xs font-medium px-1">×</span>
+                  <span className="text-muted-foreground text-xs font-medium px-1 lg:hidden">×</span>
                   <input
                     type="number"
-                    className="w-20 sm:w-24 flex-1 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
+                    className="w-20 sm:w-24 lg:w-24 flex-1 lg:flex-none rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
                     placeholder={t('rate', language)}
                     value={item.rate || ''}
                     onChange={e => updateItem(item.id, 'rate', Number(e.target.value))}
                   />
                 </div>
                 
-                <div className="flex items-center gap-3">
-                  <div className="min-w-[80px] text-right text-sm font-bold text-foreground">
+                <div className="flex items-center gap-3 lg:gap-2">
+                  <div className="min-w-[80px] lg:w-24 text-right text-sm font-bold lg:font-medium lg:mt-2 text-foreground">
                     ₹{(item.qty * item.rate).toLocaleString('en-IN')}
                   </div>
                   <button
                     onClick={() => removeRow(item.id)}
-                    className="p-1.5 text-destructive hover:bg-destructive/10 rounded transition-colors"
+                    className="p-1.5 lg:p-1 lg:mt-1 text-destructive hover:bg-destructive/10 rounded transition-colors"
                     disabled={items.length <= 1}
                   >
                     <Trash2 className="w-4 h-4" />
