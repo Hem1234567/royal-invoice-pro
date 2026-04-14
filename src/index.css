@@ -101,6 +101,10 @@
 }
 
 @media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
   body * {
     visibility: hidden;
   }
@@ -111,8 +115,11 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
+    width: 210mm;
+    min-height: auto;
+    padding: 8mm !important;
     box-shadow: none !important;
     border: none !important;
+    margin: 0 !important;
   }
 }
