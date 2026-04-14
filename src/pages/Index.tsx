@@ -221,9 +221,10 @@ const Index = () => {
             <h2 className="text-lg font-semibold text-foreground">{t('livePreview', language)}</h2>
             <div 
               ref={previewContainerRef}
-              className="rounded-xl border border-border shadow-lg bg-muted/30 p-2 sm:p-4 overflow-hidden flex justify-center"
+              className="rounded-xl border border-border shadow-lg bg-muted/30 p-2 sm:p-4 overflow-hidden flex justify-center print:overflow-visible print:border-none print:shadow-none print:bg-transparent print:p-0"
             >
               <div 
+                className="print:!transform-none print:!m-0"
                 style={{ 
                   transform: `scale(${previewScale})`, 
                   transformOrigin: 'top center',
