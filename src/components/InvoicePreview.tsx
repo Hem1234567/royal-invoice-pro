@@ -41,13 +41,16 @@ const InvoicePreview = ({
   return (
     <div
       id="invoice-preview"
-      className="bg-invoice mx-auto shadow-xl border border-invoice-border"
+    <div
+      id="invoice-preview"
+      className="bg-invoice mx-auto shadow-xl border border-invoice-border flex flex-col"
       style={{
         fontFamily: "'Inter', sans-serif",
         width: '210mm',
         minHeight: '297mm',
         padding: '12mm 15mm',
         boxSizing: 'border-box',
+        justifyContent: 'center',
       }}
     >
       {/* Devotional Header */}
