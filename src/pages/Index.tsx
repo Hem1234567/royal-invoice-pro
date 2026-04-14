@@ -30,6 +30,8 @@ const Index = () => {
   ]);
   const [gstEnabled, setGstEnabled] = useState(false);
   const [gstPercent, setGstPercent] = useState(18);
+  const [hasCustomerGst, setHasCustomerGst] = useState(false);
+  const [customerGstNo, setCustomerGstNo] = useState('');
   const [notes, setNotes] = useState('');
   const [showHistory, setShowHistory] = useState(false);
   const [historyRefresh, setHistoryRefresh] = useState(0);
@@ -88,7 +90,7 @@ const Index = () => {
   const saveCurrentBill = () => {
     saveToHistory({
       billNo, billDate, customerName, customerAddress, customerPhone,
-      items, gstEnabled, gstPercent, notes, grandTotal: computeGrandTotal(),
+      items, gstEnabled, gstPercent, hasCustomerGst, customerGstNo, notes, grandTotal: computeGrandTotal(),
     });
     setHistoryRefresh(p => p + 1);
   };
@@ -128,6 +130,8 @@ const Index = () => {
     setItems([{ id: crypto.randomUUID(), particulars: '', qty: 0, rate: 0 }]);
     setGstEnabled(false);
     setGstPercent(18);
+    setHasCustomerGst(false);
+    setCustomerGstNo('');
     setNotes('');
     toast.success(t('newBill', language) + ' #' + (billNo + 1));
   };
@@ -141,6 +145,8 @@ const Index = () => {
     setItems(inv.items);
     setGstEnabled(inv.gstEnabled);
     setGstPercent(inv.gstPercent);
+    setHasCustomerGst(inv.hasCustomerGst || false);
+    setCustomerGstNo(inv.customerGstNo || '');
     setNotes(inv.notes);
     setShowHistory(false);
     toast.success(`Loaded Bill #${inv.billNo}`);
@@ -177,6 +183,8 @@ const Index = () => {
                 items={items} setItems={setItems}
                 gstEnabled={gstEnabled} setGstEnabled={setGstEnabled}
                 gstPercent={gstPercent} setGstPercent={setGstPercent}
+                hasCustomerGst={hasCustomerGst} setHasCustomerGst={setHasCustomerGst}
+                customerGstNo={customerGstNo} setCustomerGstNo={setCustomerGstNo}
                 notes={notes} setNotes={setNotes}
               />
             </div>
@@ -243,6 +251,8 @@ const Index = () => {
                   items={items}
                   gstEnabled={gstEnabled}
                   gstPercent={gstPercent}
+                  hasCustomerGst={hasCustomerGst}
+                  customerGstNo={customerGstNo}
                   notes={notes}
                 />
               </div>

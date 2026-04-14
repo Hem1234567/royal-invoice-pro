@@ -19,12 +19,14 @@ interface InvoicePreviewProps {
   items: InvoiceItem[];
   gstEnabled: boolean;
   gstPercent: number;
+  hasCustomerGst: boolean;
+  customerGstNo: string;
   notes: string;
 }
 
 const InvoicePreview = ({
   language, customerName, customerAddress, customerPhone,
-  billDate, billNo, items, gstEnabled, gstPercent, notes,
+  billDate, billNo, items, gstEnabled, gstPercent, hasCustomerGst, customerGstNo, notes,
 }: InvoicePreviewProps) => {
   const subtotal = items.reduce((sum, item) => sum + item.qty * item.rate, 0);
   const halfGst = gstPercent / 2;
@@ -89,6 +91,7 @@ const InvoicePreview = ({
           <p><span className="font-semibold">{t('billTo', language)}:</span> {customerName || '—'}</p>
           {customerAddress && <p className="text-muted-foreground text-xs">{customerAddress}</p>}
           {customerPhone && <p className="text-muted-foreground text-xs">Ph: {customerPhone}</p>}
+          {hasCustomerGst && customerGstNo && <p className="text-muted-foreground text-xs"><span className="font-semibold">{t('customerGstNo', language)}:</span> {customerGstNo}</p>}
         </div>
         <div className="text-right space-y-1">
           <p><span className="font-semibold">{t('billNo', language)}:</span> {billNo}</p>

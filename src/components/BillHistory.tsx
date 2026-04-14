@@ -12,6 +12,8 @@ export interface SavedInvoice {
   items: InvoiceItem[];
   gstEnabled: boolean;
   gstPercent: number;
+  hasCustomerGst?: boolean;
+  customerGstNo?: string;
   notes: string;
   grandTotal: number;
   savedAt: string;

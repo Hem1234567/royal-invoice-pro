@@ -20,6 +20,10 @@ interface InvoiceFormProps {
   setGstEnabled: (v: boolean) => void;
   gstPercent: number;
   setGstPercent: (v: number) => void;
+  hasCustomerGst: boolean;
+  setHasCustomerGst: (v: boolean) => void;
+  customerGstNo: string;
+  setCustomerGstNo: (v: string) => void;
   notes: string;
   setNotes: (v: string) => void;
 }
@@ -28,6 +32,7 @@ const InvoiceForm = ({
   language, customerName, setCustomerName, customerAddress, setCustomerAddress,
   customerPhone, setCustomerPhone, billDate, setBillDate, billNo, setBillNo,
   items, setItems, gstEnabled, setGstEnabled, gstPercent, setGstPercent,
+  hasCustomerGst, setHasCustomerGst, customerGstNo, setCustomerGstNo,
   notes, setNotes,
 }: InvoiceFormProps) => {
 
@@ -63,6 +68,24 @@ const InvoiceForm = ({
             <label className="text-sm font-medium text-foreground mb-1 block">{t('customerPhone', language)}</label>
             <input className={inputClass} value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} />
           </div>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-muted/30 p-3 rounded-lg border border-border">
+          <label className="flex items-center gap-2 text-sm cursor-pointer whitespace-nowrap">
+            <input type="checkbox" checked={hasCustomerGst} onChange={e => setHasCustomerGst(e.target.checked)}
+              className="rounded border-input accent-accent h-4 w-4" />
+            {t('hasCustomerGst', language)}
+          </label>
+          {hasCustomerGst && (
+            <div className="flex-1 w-full ml-0 sm:ml-2">
+              <input 
+                className={inputClass} 
+                value={customerGstNo} 
+                onChange={e => setCustomerGstNo(e.target.value.toUpperCase())}
+                placeholder={t('customerGstNo', language)}
+              />
+            </div>
+          )}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
