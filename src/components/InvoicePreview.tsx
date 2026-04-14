@@ -1,5 +1,6 @@
 import { Language, t } from '@/lib/translations';
 import { amountToWords } from '@/lib/amountToWords';
+import royalLogo from '@/assets/royal-marbles-logo.png';
 
 export interface InvoiceItem {
   id: string;
@@ -40,16 +41,23 @@ const InvoicePreview = ({
   return (
     <div
       id="invoice-preview"
-      className="bg-invoice p-8 max-w-[210mm] mx-auto shadow-xl border border-invoice-border"
-      style={{ fontFamily: "'Inter', sans-serif", minHeight: '297mm' }}
+      className="bg-invoice mx-auto shadow-xl border border-invoice-border"
+      style={{
+        fontFamily: "'Inter', sans-serif",
+        width: '210mm',
+        minHeight: '297mm',
+        padding: '12mm 15mm',
+        boxSizing: 'border-box',
+      }}
     >
       {/* Devotional Header */}
-      <p className="text-center text-xs text-muted-foreground mb-1 italic">
+      <p className="text-center text-xs text-muted-foreground mb-2 italic">
         ஸ்ரீ மஹா கணபதி துணை
       </p>
 
-      {/* Business Header */}
+      {/* Business Header with Logo */}
       <div className="text-center border-b-2 border-primary pb-4 mb-4">
+        <img src={royalLogo} alt="Royal Marbles & Granites" className="mx-auto mb-2" style={{ height: '64px' }} />
         <h1 className="font-display text-2xl font-bold text-primary tracking-wide">
           ROYAL MARBLES & GRANITES
         </h1>
@@ -110,7 +118,6 @@ const InvoicePreview = ({
               </td>
             </tr>
           ))}
-          {/* Empty rows for bill feel */}
           {items.length < 5 && Array.from({ length: 5 - items.length }).map((_, i) => (
             <tr key={`empty-${i}`} className="border-b border-invoice-border">
               <td className="border border-invoice-border p-2">&nbsp;</td>

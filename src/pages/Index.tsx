@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Language, t } from '@/lib/translations';
 import LanguageToggle from '@/components/LanguageToggle';
 import InvoiceForm from '@/components/InvoiceForm';
 import InvoicePreview, { InvoiceItem } from '@/components/InvoicePreview';
-import { Download, Printer, FilePlus } from 'lucide-react';
+import BillHistory, { SavedInvoice, saveToHistory } from '@/components/BillHistory';
+import { Download, Printer, FilePlus, History } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -30,10 +31,25 @@ const Index = () => {
   const [gstEnabled, setGstEnabled] = useState(false);
   const [gstPercent, setGstPercent] = useState(18);
   const [notes, setNotes] = useState('');
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyRefresh, setHistoryRefresh] = useState(0);
 
   useEffect(() => {
     localStorage.setItem(BILL_NO_KEY, String(billNo));
   }, [billNo]);
+
+  useEffect(() => {
+    const handler = () => setHistoryRefresh(p => p + 1);
+    window.addEventListener('history-updated', handler);
+    return () => window.removeEventListener('history-updated', handler);
+  }, []);
+
+  const computeGrandTotal = useCallback(() => {
+    const subtotal = items.reduce((sum, item) => sum + item.qty * item.rate, 0);
+    const halfGst = gstPercent / 2;
+    const tax = gstEnabled ? subtotal * (halfGst / 100) * 2 : 0;
+    return subtotal + tax;
+  }, [items, gstEnabled, gstPercent]);
 
   const validate = (): boolean => {
     if (!customerName.trim()) {
@@ -48,8 +64,17 @@ const Index = () => {
     return true;
   };
 
+  const saveCurrentBill = () => {
+    saveToHistory({
+      billNo, billDate, customerName, customerAddress, customerPhone,
+      items, gstEnabled, gstPercent, notes, grandTotal: computeGrandTotal(),
+    });
+    setHistoryRefresh(p => p + 1);
+  };
+
   const handleDownloadPdf = async () => {
     if (!validate()) return;
+    saveCurrentBill();
     const element = document.getElementById('invoice-preview');
     if (!element) return;
     
@@ -66,10 +91,14 @@ const Index = () => {
 
   const handlePrint = () => {
     if (!validate()) return;
+    saveCurrentBill();
     window.print();
   };
 
   const handleNewBill = () => {
+    if (customerName.trim() && items.some(i => i.particulars.trim())) {
+      saveCurrentBill();
+    }
     setCustomerName('');
     setCustomerAddress('');
     setCustomerPhone('');
@@ -81,6 +110,22 @@ const Index = () => {
     setNotes('');
     toast.success(t('newBill', language) + ' #' + (billNo + 1));
   };
+
+  const handleLoadInvoice = (inv: SavedInvoice) => {
+    setCustomerName(inv.customerName);
+    setCustomerAddress(inv.customerAddress);
+    setCustomerPhone(inv.customerPhone);
+    setBillDate(inv.billDate);
+    setBillNo(inv.billNo);
+    setItems(inv.items);
+    setGstEnabled(inv.gstEnabled);
+    setGstPercent(inv.gstPercent);
+    setNotes(inv.notes);
+    setShowHistory(false);
+    toast.success(`Loaded Bill #${inv.billNo}`);
+  };
+
+  const historyLabel = language === 'ta' ? 'வரலாறு' : language === 'hi' ? 'इतिहास' : 'History';
 
   return (
     <div className="min-h-screen bg-background">
@@ -129,6 +174,24 @@ const Index = () => {
                 className="flex items-center gap-2 border border-accent text-accent px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-accent/10 transition-colors ml-auto">
                 <FilePlus className="w-4 h-4" /> {t('newBill', language)}
               </button>
+            </div>
+
+            {/* Bill History */}
+            <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+              <button
+                onClick={() => setShowHistory(!showHistory)}
+                className="w-full flex items-center justify-between px-5 py-3 text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <History className="w-4 h-4" /> {historyLabel}
+                </span>
+                <span className="text-xs text-muted-foreground">{showHistory ? '▲' : '▼'}</span>
+              </button>
+              {showHistory && (
+                <div className="px-5 pb-4">
+                  <BillHistory language={language} onLoad={handleLoadInvoice} refreshKey={historyRefresh} />
+                </div>
+              )}
             </div>
           </div>
 
