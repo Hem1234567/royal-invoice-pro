@@ -13,7 +13,7 @@ const BILL_NO_KEY = 'royal_marbles_bill_no';
 
 const getInitialBillNo = (): number => {
   const stored = localStorage.getItem(BILL_NO_KEY);
-  return stored ? Number(stored) : 399;
+  return stored ? Number(stored) : 1;
 };
 
 const todayStr = () => new Date().toISOString().split('T')[0];

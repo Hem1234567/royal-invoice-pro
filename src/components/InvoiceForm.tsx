@@ -71,7 +71,7 @@ const InvoiceForm = ({
           </div>
           <div>
             <label className="text-sm font-medium text-foreground mb-1 block">{t('billNo', language)}</label>
-            <input type="number" className={inputClass} value={billNo} onChange={e => setBillNo(Number(e.target.value))} />
+            <input type="number" min="1" className={inputClass} value={billNo} onChange={e => setBillNo(Math.max(1, Number(e.target.value)))} />
           </div>
         </div>
       </div>
@@ -96,18 +96,20 @@ const InvoiceForm = ({
                 <div className="flex items-center gap-2 flex-1 lg:flex-none min-w-[140px] lg:min-w-0">
                   <input
                     type="number"
+                    min="0"
                     className="w-16 sm:w-20 lg:w-16 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
                     placeholder={t('qty', language)}
                     value={item.qty || ''}
-                    onChange={e => updateItem(item.id, 'qty', Number(e.target.value))}
+                    onChange={e => updateItem(item.id, 'qty', Math.max(0, Number(e.target.value)))}
                   />
                   <span className="text-muted-foreground text-xs font-medium px-1 lg:hidden">×</span>
                   <input
                     type="number"
+                    min="0"
                     className="w-20 sm:w-24 lg:w-24 flex-1 lg:flex-none rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
                     placeholder={t('rate', language)}
                     value={item.rate || ''}
-                    onChange={e => updateItem(item.id, 'rate', Number(e.target.value))}
+                    onChange={e => updateItem(item.id, 'rate', Math.max(0, Number(e.target.value)))}
                   />
                 </div>
                 
@@ -142,8 +144,8 @@ const InvoiceForm = ({
         {gstEnabled ? (
           <div className="flex items-center gap-2 ml-6 sm:ml-0">
             <label className="text-sm text-muted-foreground">{t('gstPercent', language)}:</label>
-            <input type="number" className="w-20 rounded-md border border-input bg-card px-2 py-1.5 text-sm"
-              value={gstPercent} onChange={e => setGstPercent(Number(e.target.value))} />
+            <input type="number" min="0" className="w-20 rounded-md border border-input bg-card px-2 py-1.5 text-sm"
+              value={gstPercent} onChange={e => setGstPercent(Math.max(0, Number(e.target.value)))} />
           </div>
         ) : (
           <span className="text-xs text-muted-foreground ml-6 sm:ml-0">{t('gstNotApplicable', language)}</span>
