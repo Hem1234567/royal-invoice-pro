@@ -1,6 +1,6 @@
 import { Language, t } from '@/lib/translations';
 import { amountToWords } from '@/lib/amountToWords';
-import royalLogo from '@/assets/royal-marbles-logo.png';
+import royalLogo from '@/assets/Logo-preview.png';
 
 export interface InvoiceItem {
   id: string;
