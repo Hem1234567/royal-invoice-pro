@@ -41,8 +41,6 @@ const InvoicePreview = ({
   return (
     <div
       id="invoice-preview"
-    <div
-      id="invoice-preview"
       className="bg-invoice mx-auto shadow-xl border border-invoice-border flex flex-col"
       style={{
         fontFamily: "'Inter', sans-serif",
