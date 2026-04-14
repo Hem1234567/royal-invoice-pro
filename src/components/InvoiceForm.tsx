@@ -71,12 +71,12 @@ const InvoiceForm = ({
         </div>
         
         <div>
-          <label className="text-sm font-medium text-foreground mb-1 block">{t('customerGstNo', language)}</label>
+          <label className="text-sm font-medium text-foreground mb-1 block">{t('customerGstNoForm', language)}</label>
           <input 
             className={inputClass} 
             value={customerGstNo} 
             onChange={e => setCustomerGstNo(e.target.value.toUpperCase())}
-            placeholder={t('customerGstNo', language)}
+            placeholder={t('customerGstNoForm', language)}
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

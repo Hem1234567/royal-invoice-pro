@@ -33,7 +33,8 @@ export const translations: Record<string, Record<Language, string>> = {
   validationItem: { en: 'At least one item is required', ta: 'குறைந்தது ஒரு பொருள் தேவை', hi: 'कम से कम एक आइटम आवश्यक है' },
   gstPercent: { en: 'GST %', ta: 'GST %', hi: 'GST %' },
   hasCustomerGst: { en: 'I have Customer GST No', ta: 'என்னிடம் வாடிக்கையாளர் ஜிஎஸ்டி எண் உள்ளது', hi: 'मेरे पास ग्राहक का जीएसटी नंबर है' },
-  customerGstNo: { en: 'Customer GST No. (optional)', ta: 'வாடிக்கையாளர் ஜிஎஸ்டி எண் (விரும்பினால்)', hi: 'ग्राहक का जीएसटी नंबर (वैकल्पिक)' },
+  customerGstNo: { en: 'Customer GST No.', ta: 'வாடிக்கையாளர் ஜிஎஸ்டி எண்', hi: 'ग्राहक का जीएसटी नंबर' },
+  customerGstNoForm: { en: 'Customer GST No. (optional)', ta: 'வாடிக்கையாளர் ஜிஎஸ்டி எண் (விரும்பினால்)', hi: 'ग्राहक का जीएसटी नंबर (वैकल्पिक)' },
 };
 
 export const t = (key: string, lang: Language): string => {
