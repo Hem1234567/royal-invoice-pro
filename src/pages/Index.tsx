@@ -102,14 +102,41 @@ const Index = () => {
     if (!element) return;
     
     toast.info('Generating PDF...');
-    const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`RoyalMarbles_Invoice_${billNo}_${billDate}.pdf`);
-    toast.success('PDF downloaded!');
+
+    // Workaround for html2canvas alignment issues caused by parent CSS scale
+    const parent = element.parentElement;
+    const originalTransform = parent ? parent.style.transform : '';
+    const originalMargin = parent ? parent.style.marginBottom : '';
+    
+    if (parent) {
+      parent.style.transform = 'scale(1)';
+      parent.style.marginBottom = '0px';
+      // Small delay to allow the browser to re-paint the unscaled layout correctly
+      await new Promise(r => setTimeout(r, 50));
+    }
+
+    try {
+      const canvas = await html2canvas(element, { 
+        scale: 2, 
+        useCORS: true, 
+        backgroundColor: '#ffffff' 
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`RoyalMarbles_Invoice_${billNo}_${billDate}.pdf`);
+      toast.success('PDF downloaded!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to generate PDF');
+    } finally {
+      if (parent) {
+        parent.style.transform = originalTransform;
+        parent.style.marginBottom = originalMargin;
+      }
+    }
   };
 
   const handlePrint = () => {

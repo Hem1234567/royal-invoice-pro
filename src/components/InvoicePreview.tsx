@@ -60,7 +60,7 @@ const InvoicePreview = ({
 
       {/* Business Header with Logo */}
       <div className="text-center border-b-2 border-primary pb-4 mb-4">
-        <img src={royalLogo} alt="Royal Marbles & Granites" className="mx-auto mb-2" style={{ height: '64px' }} />
+        <img src={royalLogo} alt="Royal Marbles & Granites" className="mx-auto mb-2" style={{ height: '100px' }} />
         <h1 className="font-display text-2xl font-bold text-primary tracking-wide">
           ROYAL MARBLES & GRANITES
         </h1>
