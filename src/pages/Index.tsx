@@ -26,7 +26,7 @@ const Index = () => {
   const [billDate, setBillDate] = useState(todayStr());
   const [billNo, setBillNo] = useState<number | string>(getInitialBillNo);
   const [items, setItems] = useState<InvoiceItem[]>([
-    { id: crypto.randomUUID(), particulars: '', qty: 0, sqft: 0, rate: 0 },
+    { id: crypto.randomUUID(), particulars: '', length: 0, width: 0, sqft: 0, rate: 0, amount: 0 },
   ]);
   const [gstEnabled, setGstEnabled] = useState(false);
   const [gstPercent, setGstPercent] = useState(18);
@@ -69,13 +69,14 @@ const Index = () => {
 
   const computeGrandTotal = useCallback(() => {
     const subtotal = items.reduce((sum, item) => {
-      const q = item.qty || 0;
+      if (item.amount !== undefined && item.amount > 0) return sum + item.amount;
+      const l = item.length || 0;
+      const w = item.width || 0;
       const s = item.sqft || 0;
       const r = item.rate || 0;
       let amt = 0;
-      if (q > 0 && s > 0) amt = q * s * r;
-      else if (q > 0) amt = q * r;
-      else if (s > 0) amt = s * r;
+      if (s > 0) amt = s * r;
+      else if (l > 0 && w > 0) amt = l * w * r;
       return sum + amt;
     }, 0);
     const halfGst = gstPercent / 2;
@@ -88,7 +89,7 @@ const Index = () => {
       toast.error(t('validationName', language));
       return false;
     }
-    const hasItem = items.some(i => i.particulars.trim() && i.qty > 0 && i.rate > 0);
+    const hasItem = items.some(i => i.particulars.trim() && (i.amount !== undefined && i.amount > 0 || i.rate > 0));
     if (!hasItem) {
       toast.error(t('validationItem', language));
       return false;
@@ -163,7 +164,7 @@ const Index = () => {
     setCustomerPhone('');
     setBillDate(todayStr());
     setBillNo(prev => (Number(prev) || 0) + 1);
-    setItems([{ id: crypto.randomUUID(), particulars: '', qty: 0, sqft: 0, rate: 0 }]);
+    setItems([{ id: crypto.randomUUID(), particulars: '', length: 0, width: 0, sqft: 0, rate: 0, amount: 0 }]);
     setGstEnabled(false);
     setGstPercent(18);
     setHasCustomerGst(false);

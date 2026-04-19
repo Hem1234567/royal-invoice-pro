@@ -5,18 +5,22 @@ import royalLogo from '@/assets/Logo-preview.png';
 export interface InvoiceItem {
   id: string;
   particulars: string;
-  qty: number;
+  qty?: number;
+  length?: number;
+  width?: number;
   sqft?: number;
-  rate: number;
+  rate?: number;
+  amount?: number;
 }
 
 const getItemAmount = (item: InvoiceItem) => {
-  const q = item.qty || 0;
+  if (item.amount !== undefined && item.amount > 0) return item.amount;
+  const l = item.length || 0;
+  const w = item.width || 0;
   const s = item.sqft || 0;
   const r = item.rate || 0;
-  if (q > 0 && s > 0) return q * s * r;
-  if (q > 0) return q * r;
   if (s > 0) return s * r;
+  if (l > 0 && w > 0) return l * w * r;
   return 0;
 };
 
@@ -116,7 +120,7 @@ const InvoicePreview = ({
           <tr className="bg-primary text-primary-foreground">
             <th className="border border-primary p-2 text-left w-10">{t('serialNo', language)}</th>
             <th className="border border-primary p-2 text-left">{t('particulars', language)}</th>
-            <th className="border border-primary p-2 text-right w-16">{t('qty', language)}</th>
+            <th className="border border-primary p-2 text-right w-24">Size</th>
             <th className="border border-primary p-2 text-right w-20">{t('sqft', language)}</th>
             <th className="border border-primary p-2 text-right w-24">{t('rate', language)}</th>
             <th className="border border-primary p-2 text-right w-28">{t('amount', language)}</th>
@@ -127,7 +131,9 @@ const InvoicePreview = ({
             <tr key={item.id} className="border-b border-invoice-border">
               <td className="border border-invoice-border p-2">{idx + 1}</td>
               <td className="border border-invoice-border p-2">{item.particulars || '—'}</td>
-              <td className="border border-invoice-border p-2 text-right">{item.qty || ''}</td>
+              <td className="border border-invoice-border p-2 text-right">
+                {item.length && item.width ? `${item.length} × ${item.width}` : ''}
+              </td>
               <td className="border border-invoice-border p-2 text-right">{item.sqft || ''}</td>
               <td className="border border-invoice-border p-2 text-right">{item.rate ? `₹${item.rate.toLocaleString('en-IN')}` : ''}</td>
               <td className="border border-invoice-border p-2 text-right font-medium">

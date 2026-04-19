@@ -59,7 +59,7 @@ const InvoiceForm = ({
   const [focusedItemId, setFocusedItemId] = useState<string | null>(null);
 
   const addRow = () => {
-    setItems([...items, { id: crypto.randomUUID(), particulars: '', qty: 0, sqft: 0, rate: 0 }]);
+    setItems([...items, { id: crypto.randomUUID(), particulars: '', length: 0, width: 0, sqft: 0, rate: 0, amount: 0 }]);
   };
 
   const removeRow = (id: string) => {
@@ -157,44 +157,86 @@ const InvoiceForm = ({
                   <input
                     type="number"
                     min="0"
+                    step="0.01"
                     className="w-16 sm:w-20 lg:w-16 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
-                    placeholder={t('qty', language)}
-                    value={item.qty || ''}
-                    onChange={e => updateItem(item.id, 'qty', Math.max(0, Number(e.target.value)))}
+                    placeholder="L"
+                    value={item.length || ''}
+                    onChange={e => {
+                      const val = Math.max(0, Number(e.target.value));
+                      const newItem = { ...item, length: val };
+                      if (val > 0 && newItem.width) {
+                        newItem.sqft = Number((val * newItem.width).toFixed(2));
+                        if (newItem.rate) {
+                          newItem.amount = Number((newItem.sqft * newItem.rate).toFixed(2));
+                        }
+                      }
+                      setItems(items.map(i => i.id === item.id ? newItem : i));
+                    }}
                   />
                   <span className="text-muted-foreground text-xs font-medium px-1 lg:hidden">×</span>
                   <input
                     type="number"
                     min="0"
                     step="0.01"
-                    className="w-16 sm:w-20 lg:w-20 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
+                    className="w-16 sm:w-20 lg:w-16 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
+                    placeholder="W"
+                    value={item.width || ''}
+                    onChange={e => {
+                      const val = Math.max(0, Number(e.target.value));
+                      const newItem = { ...item, width: val };
+                      if (val > 0 && newItem.length) {
+                        newItem.sqft = Number((val * newItem.length).toFixed(2));
+                        if (newItem.rate) {
+                          newItem.amount = Number((newItem.sqft * newItem.rate).toFixed(2));
+                        }
+                      }
+                      setItems(items.map(i => i.id === item.id ? newItem : i));
+                    }}
+                  />
+                  <span className="text-muted-foreground text-xs font-medium px-1 lg:hidden">=</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="w-16 sm:w-20 lg:w-20 rounded-md border border-input bg-muted px-2 py-1.5 text-sm text-right text-muted-foreground cursor-not-allowed"
                     placeholder={t('sqft', language)}
                     value={item.sqft || ''}
-                    onChange={e => updateItem(item.id, 'sqft', Math.max(0, Number(e.target.value)))}
+                    readOnly
+                    tabIndex={-1}
                   />
                   <span className="text-muted-foreground text-xs font-medium px-1 lg:hidden">×</span>
                   <input
                     type="number"
                     min="0"
+                    step="0.01"
                     className="w-20 sm:w-24 lg:w-24 flex-1 lg:flex-none rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
                     placeholder={t('rate', language)}
                     value={item.rate || ''}
-                    onChange={e => updateItem(item.id, 'rate', Math.max(0, Number(e.target.value)))}
+                    onChange={e => {
+                      const val = Math.max(0, Number(e.target.value));
+                      const newItem = { ...item, rate: val };
+                      if (val > 0 && newItem.sqft) {
+                        newItem.amount = Number((val * newItem.sqft).toFixed(2));
+                      } else if (val > 0 && newItem.length && newItem.width) {
+                         newItem.amount = Number((newItem.length * newItem.width * val).toFixed(2));
+                      }
+                      setItems(items.map(i => i.id === item.id ? newItem : i));
+                    }}
                   />
                 </div>
                 
                 <div className="flex items-center gap-3 lg:gap-2">
-                  <div className="min-w-[80px] lg:w-24 text-right text-sm font-bold lg:font-medium lg:mt-2 text-foreground">
-                    ₹{(() => {
-                      const q = item.qty || 0;
-                      const s = item.sqft || 0;
-                      const r = item.rate || 0;
-                      let amt = 0;
-                      if (q > 0 && s > 0) amt = q * s * r;
-                      else if (q > 0) amt = q * r;
-                      else if (s > 0) amt = s * r;
-                      return amt.toLocaleString('en-IN', { maximumFractionDigits: 2 });
-                    })()}
+                  <div className="flex items-center min-w-[80px] lg:w-28 text-right text-sm font-medium lg:mt-2 text-foreground">
+                    <span className="mr-1">₹</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      className="w-full rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right font-bold"
+                      placeholder={t('amount', language)}
+                      value={item.amount || ''}
+                      onChange={e => updateItem(item.id, 'amount', Math.max(0, Number(e.target.value)))}
+                    />
                   </div>
                   <button
                     onClick={() => removeRow(item.id)}
