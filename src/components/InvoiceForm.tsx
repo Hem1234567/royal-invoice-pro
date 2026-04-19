@@ -1,6 +1,27 @@
 import { Language, t } from '@/lib/translations';
 import { InvoiceItem } from './InvoicePreview';
 import { Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+
+const GRANITE_OPTIONS = [
+  "Asian top granite",
+  "asan green granite",
+  "black galaxy granite",
+  "Safari blue granite",
+  "Black pearl granite",
+  "Lakshmi Red granite",
+  "Sagar Ali granite",
+  "red lapathoro granite",
+  "blue lapathoro granite",
+  "red granite",
+  "red parpari granite",
+  "block per Pari granite",
+  "Steel grey granite",
+  "white granite",
+  "black granite",
+  "plumbing granite",
+  "aasan green granite"
+];
 
 interface InvoiceFormProps {
   language: Language;
@@ -12,8 +33,8 @@ interface InvoiceFormProps {
   setCustomerPhone: (v: string) => void;
   billDate: string;
   setBillDate: (v: string) => void;
-  billNo: number;
-  setBillNo: (v: number) => void;
+  billNo: number | string;
+  setBillNo: (v: number | string) => void;
   items: InvoiceItem[];
   setItems: (items: InvoiceItem[]) => void;
   gstEnabled: boolean;
@@ -35,9 +56,10 @@ const InvoiceForm = ({
   hasCustomerGst, setHasCustomerGst, customerGstNo, setCustomerGstNo,
   notes, setNotes,
 }: InvoiceFormProps) => {
+  const [focusedItemId, setFocusedItemId] = useState<string | null>(null);
 
   const addRow = () => {
-    setItems([...items, { id: crypto.randomUUID(), particulars: '', qty: 0, rate: 0 }]);
+    setItems([...items, { id: crypto.randomUUID(), particulars: '', qty: 0, sqft: 0, rate: 0 }]);
   };
 
   const removeRow = (id: string) => {
@@ -86,7 +108,7 @@ const InvoiceForm = ({
           </div>
           <div>
             <label className="text-sm font-medium text-foreground mb-1 block">{t('billNo', language)}</label>
-            <input type="number" min="1" className={inputClass} value={billNo} onChange={e => setBillNo(Math.max(1, Number(e.target.value)))} />
+            <input type="number" min="1" className={inputClass} value={billNo} onChange={e => setBillNo(e.target.value === '' ? '' : Math.max(1, Number(e.target.value)))} />
           </div>
         </div>
       </div>
@@ -99,12 +121,35 @@ const InvoiceForm = ({
             <div key={item.id} className="flex flex-col lg:flex-row gap-3 lg:gap-2 lg:items-start bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 w-full lg:w-auto lg:flex-1">
                 <span className="text-xs text-muted-foreground w-6 shrink-0 lg:mt-2">{idx + 1}.</span>
-                <input
-                  className="flex-1 min-w-0 rounded-md border border-input bg-card px-2 py-1.5 text-sm"
-                  placeholder={t('particulars', language)}
-                  value={item.particulars}
-                  onChange={e => updateItem(item.id, 'particulars', e.target.value)}
-                />
+                <div className="relative flex-1 min-w-0">
+                  <input
+                    className="w-full rounded-md border border-input bg-card px-2 py-1.5 text-sm"
+                    placeholder={t('particulars', language)}
+                    value={item.particulars}
+                    onChange={e => updateItem(item.id, 'particulars', e.target.value)}
+                    onFocus={() => setFocusedItemId(item.id)}
+                    onBlur={() => setTimeout(() => setFocusedItemId(null), 200)}
+                  />
+                  {focusedItemId === item.id && (
+                    <div className="absolute z-10 w-full mt-1 bg-card border border-input rounded-md shadow-lg max-h-64 overflow-y-auto">
+                      <div className="flex flex-col p-1 gap-1">
+                        {GRANITE_OPTIONS.filter(opt => opt.toLowerCase().includes(item.particulars.toLowerCase())).map((option, i) => (
+                          <div
+                            key={i}
+                            className="px-2 py-1.5 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer rounded-sm truncate"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              updateItem(item.id, 'particulars', option);
+                              setFocusedItemId(null);
+                            }}
+                          >
+                            {option}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="flex flex-wrap items-center justify-between gap-3 pl-8 lg:pl-0 w-full lg:w-auto lg:justify-end">
@@ -121,6 +166,16 @@ const InvoiceForm = ({
                   <input
                     type="number"
                     min="0"
+                    step="0.01"
+                    className="w-16 sm:w-20 lg:w-20 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
+                    placeholder={t('sqft', language)}
+                    value={item.sqft || ''}
+                    onChange={e => updateItem(item.id, 'sqft', Math.max(0, Number(e.target.value)))}
+                  />
+                  <span className="text-muted-foreground text-xs font-medium px-1 lg:hidden">×</span>
+                  <input
+                    type="number"
+                    min="0"
                     className="w-20 sm:w-24 lg:w-24 flex-1 lg:flex-none rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
                     placeholder={t('rate', language)}
                     value={item.rate || ''}
@@ -130,7 +185,16 @@ const InvoiceForm = ({
                 
                 <div className="flex items-center gap-3 lg:gap-2">
                   <div className="min-w-[80px] lg:w-24 text-right text-sm font-bold lg:font-medium lg:mt-2 text-foreground">
-                    ₹{(item.qty * item.rate).toLocaleString('en-IN')}
+                    ₹{(() => {
+                      const q = item.qty || 0;
+                      const s = item.sqft || 0;
+                      const r = item.rate || 0;
+                      let amt = 0;
+                      if (q > 0 && s > 0) amt = q * s * r;
+                      else if (q > 0) amt = q * r;
+                      else if (s > 0) amt = s * r;
+                      return amt.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+                    })()}
                   </div>
                   <button
                     onClick={() => removeRow(item.id)}

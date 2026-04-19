@@ -4,7 +4,7 @@ import { Eye, Trash2 } from 'lucide-react';
 
 export interface SavedInvoice {
   id: string;
-  billNo: number;
+  billNo: number | string;
   billDate: string;
   customerName: string;
   customerAddress: string;

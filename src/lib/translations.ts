@@ -6,6 +6,7 @@ export const translations: Record<string, Record<Language, string>> = {
   billNo: { en: 'Bill No.', ta: 'பில் எண்', hi: 'बिल नंबर' },
   particulars: { en: 'Particulars', ta: 'விவரங்கள்', hi: 'विवरण' },
   qty: { en: 'Qty', ta: 'அளவு', hi: 'मात्रा' },
+  sqft: { en: 'Sq.Ft', ta: 'ச.அடி', hi: 'वर्ग फुट' },
   rate: { en: 'Rate (₹)', ta: 'விலை (₹)', hi: 'दर (₹)' },
   amount: { en: 'Amount (₹)', ta: 'தொகை (₹)', hi: 'राशि (₹)' },
   subtotal: { en: 'Subtotal', ta: 'மொத்தம்', hi: 'उप-कुल' },

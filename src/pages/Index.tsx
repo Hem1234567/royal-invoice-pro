@@ -24,9 +24,9 @@ const Index = () => {
   const [customerAddress, setCustomerAddress] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [billDate, setBillDate] = useState(todayStr());
-  const [billNo, setBillNo] = useState(getInitialBillNo);
+  const [billNo, setBillNo] = useState<number | string>(getInitialBillNo);
   const [items, setItems] = useState<InvoiceItem[]>([
-    { id: crypto.randomUUID(), particulars: '', qty: 0, rate: 0 },
+    { id: crypto.randomUUID(), particulars: '', qty: 0, sqft: 0, rate: 0 },
   ]);
   const [gstEnabled, setGstEnabled] = useState(false);
   const [gstPercent, setGstPercent] = useState(18);
@@ -68,7 +68,16 @@ const Index = () => {
   }, []);
 
   const computeGrandTotal = useCallback(() => {
-    const subtotal = items.reduce((sum, item) => sum + item.qty * item.rate, 0);
+    const subtotal = items.reduce((sum, item) => {
+      const q = item.qty || 0;
+      const s = item.sqft || 0;
+      const r = item.rate || 0;
+      let amt = 0;
+      if (q > 0 && s > 0) amt = q * s * r;
+      else if (q > 0) amt = q * r;
+      else if (s > 0) amt = s * r;
+      return sum + amt;
+    }, 0);
     const halfGst = gstPercent / 2;
     const tax = gstEnabled ? subtotal * (halfGst / 100) * 2 : 0;
     return subtotal + tax;
@@ -153,14 +162,14 @@ const Index = () => {
     setCustomerAddress('');
     setCustomerPhone('');
     setBillDate(todayStr());
-    setBillNo(prev => prev + 1);
-    setItems([{ id: crypto.randomUUID(), particulars: '', qty: 0, rate: 0 }]);
+    setBillNo(prev => (Number(prev) || 0) + 1);
+    setItems([{ id: crypto.randomUUID(), particulars: '', qty: 0, sqft: 0, rate: 0 }]);
     setGstEnabled(false);
     setGstPercent(18);
     setHasCustomerGst(false);
     setCustomerGstNo('');
     setNotes('');
-    toast.success(t('newBill', language) + ' #' + (billNo + 1));
+    toast.success(t('newBill', language) + ' #' + ((Number(billNo) || 0) + 1));
   };
 
   const handleLoadInvoice = (inv: SavedInvoice) => {

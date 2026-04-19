@@ -6,8 +6,19 @@ export interface InvoiceItem {
   id: string;
   particulars: string;
   qty: number;
+  sqft?: number;
   rate: number;
 }
+
+const getItemAmount = (item: InvoiceItem) => {
+  const q = item.qty || 0;
+  const s = item.sqft || 0;
+  const r = item.rate || 0;
+  if (q > 0 && s > 0) return q * s * r;
+  if (q > 0) return q * r;
+  if (s > 0) return s * r;
+  return 0;
+};
 
 interface InvoicePreviewProps {
   language: Language;
@@ -15,7 +26,7 @@ interface InvoicePreviewProps {
   customerAddress: string;
   customerPhone: string;
   billDate: string;
-  billNo: number;
+  billNo: number | string;
   items: InvoiceItem[];
   gstEnabled: boolean;
   gstPercent: number;
@@ -28,7 +39,7 @@ const InvoicePreview = ({
   language, customerName, customerAddress, customerPhone,
   billDate, billNo, items, gstEnabled, gstPercent, hasCustomerGst, customerGstNo, notes,
 }: InvoicePreviewProps) => {
-  const subtotal = items.reduce((sum, item) => sum + item.qty * item.rate, 0);
+  const subtotal = items.reduce((sum, item) => sum + getItemAmount(item), 0);
   const halfGst = gstPercent / 2;
   const cgst = gstEnabled ? subtotal * (halfGst / 100) : 0;
   const sgst = gstEnabled ? subtotal * (halfGst / 100) : 0;
@@ -60,7 +71,7 @@ const InvoicePreview = ({
 
       {/* Business Header with Logo */}
       <div className="text-center border-b-2 border-primary pb-4 mb-4">
-        <img src={royalLogo} alt="Royal Marbles & Granites" className="mx-auto mb-2" style={{ height: '100px' }} />
+        <img src={royalLogo} alt="Royal Marbles & Granites" className="mx-auto mb-2" style={{ height: '130px' }} />
         <h1 className="font-display text-2xl font-bold text-primary tracking-wide">
           ROYAL MARBLES & GRANITES
         </h1>
@@ -106,6 +117,7 @@ const InvoicePreview = ({
             <th className="border border-primary p-2 text-left w-10">{t('serialNo', language)}</th>
             <th className="border border-primary p-2 text-left">{t('particulars', language)}</th>
             <th className="border border-primary p-2 text-right w-16">{t('qty', language)}</th>
+            <th className="border border-primary p-2 text-right w-20">{t('sqft', language)}</th>
             <th className="border border-primary p-2 text-right w-24">{t('rate', language)}</th>
             <th className="border border-primary p-2 text-right w-28">{t('amount', language)}</th>
           </tr>
@@ -116,14 +128,16 @@ const InvoicePreview = ({
               <td className="border border-invoice-border p-2">{idx + 1}</td>
               <td className="border border-invoice-border p-2">{item.particulars || '—'}</td>
               <td className="border border-invoice-border p-2 text-right">{item.qty || ''}</td>
+              <td className="border border-invoice-border p-2 text-right">{item.sqft || ''}</td>
               <td className="border border-invoice-border p-2 text-right">{item.rate ? `₹${item.rate.toLocaleString('en-IN')}` : ''}</td>
               <td className="border border-invoice-border p-2 text-right font-medium">
-                {item.qty && item.rate ? `₹${(item.qty * item.rate).toLocaleString('en-IN')}` : ''}
+                {getItemAmount(item) > 0 ? `₹${getItemAmount(item).toLocaleString('en-IN', { maximumFractionDigits: 2 })}` : ''}
               </td>
             </tr>
           ))}
           {items.length < 5 && Array.from({ length: 5 - items.length }).map((_, i) => (
             <tr key={`empty-${i}`} className="border-b border-invoice-border">
+              <td className="border border-invoice-border p-2">&nbsp;</td>
               <td className="border border-invoice-border p-2">&nbsp;</td>
               <td className="border border-invoice-border p-2">&nbsp;</td>
               <td className="border border-invoice-border p-2">&nbsp;</td>
