@@ -3,7 +3,7 @@ import { Language, t } from '@/lib/translations';
 import LanguageToggle from '@/components/LanguageToggle';
 import InvoiceForm from '@/components/InvoiceForm';
 import InvoicePreview, { InvoiceItem } from '@/components/InvoicePreview';
-import BillHistory, { SavedInvoice, saveToHistory } from '@/components/BillHistory';
+import BillHistory, { SavedInvoice, saveToHistoryDB } from '@/components/BillHistory';
 import { Download, Printer, FilePlus, History } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
@@ -24,9 +24,9 @@ const Index = () => {
   const [customerAddress, setCustomerAddress] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [billDate, setBillDate] = useState(todayStr());
-  const [billNo, setBillNo] = useState<number | string>(getInitialBillNo);
+  const [billNo, setBillNo] = useState(getInitialBillNo);
   const [items, setItems] = useState<InvoiceItem[]>([
-    { id: crypto.randomUUID(), particulars: '', length: 0, width: 0, sqft: 0, rate: 0, amount: 0 },
+    { id: crypto.randomUUID(), particulars: '', size: '', no: 0, sqft: 0, rate: 0 },
   ]);
   const [gstEnabled, setGstEnabled] = useState(false);
   const [gstPercent, setGstPercent] = useState(18);
@@ -68,17 +68,11 @@ const Index = () => {
   }, []);
 
   const computeGrandTotal = useCallback(() => {
-    const subtotal = items.reduce((sum, item) => {
-      if (item.amount !== undefined && item.amount > 0) return sum + item.amount;
-      const l = item.length || 0;
-      const w = item.width || 0;
-      const s = item.sqft || 0;
-      const r = item.rate || 0;
-      let amt = 0;
-      if (s > 0) amt = s * r;
-      else if (l > 0 && w > 0) amt = l * w * r;
-      return sum + amt;
-    }, 0);
+    const getRowTotal = (item: InvoiceItem) => {
+      const qty = item.sqft && item.sqft > 0 ? item.sqft : (item.no && item.no > 0 ? item.no : 0);
+      return qty * (item.rate || 0);
+    };
+    const subtotal = items.reduce((sum, item) => sum + getRowTotal(item), 0);
     const halfGst = gstPercent / 2;
     const tax = gstEnabled ? subtotal * (halfGst / 100) * 2 : 0;
     return subtotal + tax;
@@ -89,7 +83,7 @@ const Index = () => {
       toast.error(t('validationName', language));
       return false;
     }
-    const hasItem = items.some(i => i.particulars.trim() && (i.amount !== undefined && i.amount > 0 || i.rate > 0));
+    const hasItem = items.some(i => i.particulars.trim() && ((i.sqft || 0) > 0 || (i.no || 0) > 0) && i.rate > 0);
     if (!hasItem) {
       toast.error(t('validationItem', language));
       return false;
@@ -97,8 +91,8 @@ const Index = () => {
     return true;
   };
 
-  const saveCurrentBill = () => {
-    saveToHistory({
+  const saveCurrentBill = async () => {
+    await saveToHistoryDB({
       billNo, billDate, customerName, customerAddress, customerPhone,
       items, gstEnabled, gstPercent, hasCustomerGst, customerGstNo, notes, grandTotal: computeGrandTotal(),
     });
@@ -107,7 +101,7 @@ const Index = () => {
 
   const handleDownloadPdf = async () => {
     if (!validate()) return;
-    saveCurrentBill();
+    await saveCurrentBill();
     const element = document.getElementById('invoice-preview');
     if (!element) return;
     
@@ -149,28 +143,28 @@ const Index = () => {
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     if (!validate()) return;
-    saveCurrentBill();
+    await saveCurrentBill();
     window.print();
   };
 
-  const handleNewBill = () => {
+  const handleNewBill = async () => {
     if (customerName.trim() && items.some(i => i.particulars.trim())) {
-      saveCurrentBill();
+      await saveCurrentBill();
     }
     setCustomerName('');
     setCustomerAddress('');
     setCustomerPhone('');
     setBillDate(todayStr());
-    setBillNo(prev => (Number(prev) || 0) + 1);
-    setItems([{ id: crypto.randomUUID(), particulars: '', length: 0, width: 0, sqft: 0, rate: 0, amount: 0 }]);
+    setBillNo(prev => prev + 1);
+    setItems([{ id: crypto.randomUUID(), particulars: '', size: '', no: 0, sqft: 0, rate: 0 }]);
     setGstEnabled(false);
     setGstPercent(18);
     setHasCustomerGst(false);
     setCustomerGstNo('');
     setNotes('');
-    toast.success(t('newBill', language) + ' #' + ((Number(billNo) || 0) + 1));
+    toast.success(t('newBill', language) + ' #' + (billNo + 1));
   };
 
   const handleLoadInvoice = (inv: SavedInvoice) => {

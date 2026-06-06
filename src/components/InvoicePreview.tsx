@@ -5,24 +5,11 @@ import royalLogo from '@/assets/Logo-preview.png';
 export interface InvoiceItem {
   id: string;
   particulars: string;
-  qty?: number;
-  length?: number;
-  width?: number;
+  size?: string;
+  no?: number;
   sqft?: number;
-  rate?: number;
-  amount?: number;
+  rate: number;
 }
-
-const getItemAmount = (item: InvoiceItem) => {
-  if (item.amount !== undefined && item.amount > 0) return item.amount;
-  const l = item.length || 0;
-  const w = item.width || 0;
-  const s = item.sqft || 0;
-  const r = item.rate || 0;
-  if (s > 0) return s * r;
-  if (l > 0 && w > 0) return l * w * r;
-  return 0;
-};
 
 interface InvoicePreviewProps {
   language: Language;
@@ -30,7 +17,7 @@ interface InvoicePreviewProps {
   customerAddress: string;
   customerPhone: string;
   billDate: string;
-  billNo: number | string;
+  billNo: number;
   items: InvoiceItem[];
   gstEnabled: boolean;
   gstPercent: number;
@@ -43,7 +30,12 @@ const InvoicePreview = ({
   language, customerName, customerAddress, customerPhone,
   billDate, billNo, items, gstEnabled, gstPercent, hasCustomerGst, customerGstNo, notes,
 }: InvoicePreviewProps) => {
-  const subtotal = items.reduce((sum, item) => sum + getItemAmount(item), 0);
+  const getRowTotal = (item: InvoiceItem) => {
+    const qty = item.sqft && item.sqft > 0 ? item.sqft : (item.no && item.no > 0 ? item.no : 0);
+    return qty * (item.rate || 0);
+  };
+
+  const subtotal = items.reduce((sum, item) => sum + getRowTotal(item), 0);
   const halfGst = gstPercent / 2;
   const cgst = gstEnabled ? subtotal * (halfGst / 100) : 0;
   const sgst = gstEnabled ? subtotal * (halfGst / 100) : 0;
@@ -75,7 +67,7 @@ const InvoicePreview = ({
 
       {/* Business Header with Logo */}
       <div className="text-center border-b-2 border-primary pb-4 mb-4">
-        <img src={royalLogo} alt="Royal Marbles & Granites" className="mx-auto mb-2" style={{ height: '130px' }} />
+        <img src={royalLogo} alt="Royal Marbles & Granites" className="mx-auto mb-2" style={{ height: '100px' }} />
         <h1 className="font-display text-2xl font-bold text-primary tracking-wide">
           ROYAL MARBLES & GRANITES
         </h1>
@@ -120,8 +112,9 @@ const InvoicePreview = ({
           <tr className="bg-primary text-primary-foreground">
             <th className="border border-primary p-2 text-left w-10">{t('serialNo', language)}</th>
             <th className="border border-primary p-2 text-left">{t('particulars', language)}</th>
-            <th className="border border-primary p-2 text-right w-24">Size</th>
-            <th className="border border-primary p-2 text-right w-20">{t('sqft', language)}</th>
+            <th className="border border-primary p-2 text-left w-20">{t('size', language)}</th>
+            <th className="border border-primary p-2 text-right w-12">{t('no', language)}</th>
+            <th className="border border-primary p-2 text-right w-16">{t('sqft', language)}</th>
             <th className="border border-primary p-2 text-right w-24">{t('rate', language)}</th>
             <th className="border border-primary p-2 text-right w-28">{t('amount', language)}</th>
           </tr>
@@ -131,18 +124,18 @@ const InvoicePreview = ({
             <tr key={item.id} className="border-b border-invoice-border">
               <td className="border border-invoice-border p-2">{idx + 1}</td>
               <td className="border border-invoice-border p-2">{item.particulars || '—'}</td>
-              <td className="border border-invoice-border p-2 text-right">
-                {item.length && item.width ? `${item.length} × ${item.width}` : ''}
-              </td>
+              <td className="border border-invoice-border p-2 text-xs">{item.size || '—'}</td>
+              <td className="border border-invoice-border p-2 text-right">{item.no || ''}</td>
               <td className="border border-invoice-border p-2 text-right">{item.sqft || ''}</td>
               <td className="border border-invoice-border p-2 text-right">{item.rate ? `₹${item.rate.toLocaleString('en-IN')}` : ''}</td>
               <td className="border border-invoice-border p-2 text-right font-medium">
-                {getItemAmount(item) > 0 ? `₹${getItemAmount(item).toLocaleString('en-IN', { maximumFractionDigits: 2 })}` : ''}
+                {getRowTotal(item) > 0 ? `₹${getRowTotal(item).toLocaleString('en-IN')}` : ''}
               </td>
             </tr>
           ))}
           {items.length < 5 && Array.from({ length: 5 - items.length }).map((_, i) => (
             <tr key={`empty-${i}`} className="border-b border-invoice-border">
+              <td className="border border-invoice-border p-2">&nbsp;</td>
               <td className="border border-invoice-border p-2">&nbsp;</td>
               <td className="border border-invoice-border p-2">&nbsp;</td>
               <td className="border border-invoice-border p-2">&nbsp;</td>
