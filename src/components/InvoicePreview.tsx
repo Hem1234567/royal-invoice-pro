@@ -57,7 +57,6 @@ const InvoicePreview = ({
         minHeight: '297mm',
         padding: '12mm 15mm',
         boxSizing: 'border-box',
-        justifyContent: 'center',
       }}
     >
       {/* Devotional Header */}
@@ -66,28 +65,28 @@ const InvoicePreview = ({
       </p>
 
       {/* Business Header with Logo */}
-      <div className="text-center border-b-2 border-primary pb-4 mb-4">
-        <img src={royalLogo} alt="Royal Marbles & Granites" className="mx-auto mb-2" style={{ height: '100px' }} />
-        <h1 className="font-display text-2xl font-bold text-primary tracking-wide">
+      <div className="text-center border-b-2 border-primary pb-2 mb-2">
+        <img src={royalLogo} alt="Royal Marbles & Granites" className="mx-auto mb-1" style={{ height: '80px' }} />
+        <h1 className="font-display text-xl font-bold text-primary tracking-wide mb-1">
           ROYAL MARBLES & GRANITES
         </h1>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground leading-tight">
           Tiles, Marbles &amp; Granite Dealers
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground leading-tight">
           No. 1943, TNHB, Kakkalur Bypass Road, Kakkalur Village, Thiruvallur – 602 001
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground leading-tight">
           Ph: 9894297412 / 8939430036
         </p>
-        <p className="text-xs text-muted-foreground font-semibold">
+        <p className="text-xs text-muted-foreground font-semibold leading-tight">
           GSTIN: 33FJJPS5599K1Z8
         </p>
       </div>
 
       {/* Cash Bill Header */}
-      <div className="text-center mb-4">
-        <span className="inline-block border-2 border-primary px-6 py-1 text-sm font-bold text-primary tracking-widest">
+      <div className="text-center mb-3">
+        <span className="inline-block border-2 border-primary px-6 py-0.5 text-sm font-bold text-primary tracking-widest">
           {t('cashBill', language)}
         </span>
       </div>
