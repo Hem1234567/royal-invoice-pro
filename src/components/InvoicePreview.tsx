@@ -55,7 +55,7 @@ const InvoicePreview = ({
         fontFamily: "'Inter', sans-serif",
         width: '210mm',
         minHeight: '297mm',
-        padding: '12mm 15mm',
+        padding: '8mm 12mm',
         boxSizing: 'border-box',
       }}
     >
@@ -109,38 +109,38 @@ const InvoicePreview = ({
       <table className="w-full text-sm border-collapse mb-4">
         <thead>
           <tr className="bg-primary text-primary-foreground">
-            <th className="border border-primary p-2 text-left w-10">{t('serialNo', language)}</th>
-            <th className="border border-primary p-2 text-left">{t('particulars', language)}</th>
-            <th className="border border-primary p-2 text-left w-20">{t('size', language)}</th>
-            <th className="border border-primary p-2 text-right w-12">{t('no', language)}</th>
-            <th className="border border-primary p-2 text-right w-16">{t('sqft', language)}</th>
-            <th className="border border-primary p-2 text-right w-24">{t('rate', language)}</th>
-            <th className="border border-primary p-2 text-right w-28">{t('amount', language)}</th>
+            <th className="border border-primary py-1 px-2 text-left w-10">{t('serialNo', language)}</th>
+            <th className="border border-primary py-1 px-2 text-left">{t('particulars', language)}</th>
+            <th className="border border-primary py-1 px-2 text-left w-20">{t('size', language)}</th>
+            <th className="border border-primary py-1 px-2 text-right w-12">{t('no', language)}</th>
+            <th className="border border-primary py-1 px-2 text-right w-16">{t('sqft', language)}</th>
+            <th className="border border-primary py-1 px-2 text-right w-24">{t('rate', language)}</th>
+            <th className="border border-primary py-1 px-2 text-right w-28">{t('amount', language)}</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, idx) => (
             <tr key={item.id} className="border-b border-invoice-border">
-              <td className="border border-invoice-border p-2">{idx + 1}</td>
-              <td className="border border-invoice-border p-2">{item.particulars || '—'}</td>
-              <td className="border border-invoice-border p-2 text-xs">{item.size || '—'}</td>
-              <td className="border border-invoice-border p-2 text-right">{item.no || ''}</td>
-              <td className="border border-invoice-border p-2 text-right">{item.sqft || ''}</td>
-              <td className="border border-invoice-border p-2 text-right">{item.rate ? `₹${item.rate.toLocaleString('en-IN')}` : ''}</td>
-              <td className="border border-invoice-border p-2 text-right font-medium">
+              <td className="border border-invoice-border py-1 px-2">{idx + 1}</td>
+              <td className="border border-invoice-border py-1 px-2">{item.particulars || '—'}</td>
+              <td className="border border-invoice-border py-1 px-2 text-xs">{item.size || '—'}</td>
+              <td className="border border-invoice-border py-1 px-2 text-right">{item.no || ''}</td>
+              <td className="border border-invoice-border py-1 px-2 text-right">{item.sqft || ''}</td>
+              <td className="border border-invoice-border py-1 px-2 text-right">{item.rate ? `₹${item.rate.toLocaleString('en-IN')}` : ''}</td>
+              <td className="border border-invoice-border py-1 px-2 text-right font-medium">
                 {getRowTotal(item) > 0 ? `₹${getRowTotal(item).toLocaleString('en-IN')}` : ''}
               </td>
             </tr>
           ))}
           {items.length < 5 && Array.from({ length: 5 - items.length }).map((_, i) => (
             <tr key={`empty-${i}`} className="border-b border-invoice-border">
-              <td className="border border-invoice-border p-2">&nbsp;</td>
-              <td className="border border-invoice-border p-2">&nbsp;</td>
-              <td className="border border-invoice-border p-2">&nbsp;</td>
-              <td className="border border-invoice-border p-2">&nbsp;</td>
-              <td className="border border-invoice-border p-2">&nbsp;</td>
-              <td className="border border-invoice-border p-2">&nbsp;</td>
-              <td className="border border-invoice-border p-2">&nbsp;</td>
+              <td className="border border-invoice-border py-1 px-2">&nbsp;</td>
+              <td className="border border-invoice-border py-1 px-2">&nbsp;</td>
+              <td className="border border-invoice-border py-1 px-2">&nbsp;</td>
+              <td className="border border-invoice-border py-1 px-2">&nbsp;</td>
+              <td className="border border-invoice-border py-1 px-2">&nbsp;</td>
+              <td className="border border-invoice-border py-1 px-2">&nbsp;</td>
+              <td className="border border-invoice-border py-1 px-2">&nbsp;</td>
             </tr>
           ))}
         </tbody>
@@ -186,10 +186,10 @@ const InvoicePreview = ({
       )}
 
       {/* Signature */}
-      <div className="flex justify-end mt-12">
+      <div className="flex justify-end mt-6">
         <div className="text-center">
           <p className="text-sm font-semibold text-primary">{t('forRoyal', language)}</p>
-          <div className="mt-10 border-t border-foreground pt-1">
+          <div className="mt-8 border-t border-foreground pt-1">
             <p className="text-xs text-muted-foreground">{t('signature', language)}</p>
           </div>
         </div>
