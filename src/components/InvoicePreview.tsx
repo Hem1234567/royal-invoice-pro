@@ -6,6 +6,8 @@ export interface InvoiceItem {
   id: string;
   particulars: string;
   size?: string;
+  length?: string;
+  width?: string;
   no?: number;
   sqft?: number;
   rate: number;
@@ -123,7 +125,7 @@ const InvoicePreview = ({
             <tr key={item.id} className="border-b border-invoice-border">
               <td className="border border-invoice-border py-1 px-2">{idx + 1}</td>
               <td className="border border-invoice-border py-1 px-2">{item.particulars || '—'}</td>
-              <td className="border border-invoice-border py-1 px-2 text-xs">{item.size || '—'}</td>
+              <td className="border border-invoice-border py-1 px-2 text-xs">{(item.length || item.width) ? `${item.length || ''} * ${item.width || ''}` : (item.size || '—')}</td>
               <td className="border border-invoice-border py-1 px-2 text-right">{item.no || ''}</td>
               <td className="border border-invoice-border py-1 px-2 text-right">{item.sqft || ''}</td>
               <td className="border border-invoice-border py-1 px-2 text-right">{item.rate ? `₹${item.rate.toLocaleString('en-IN')}` : ''}</td>

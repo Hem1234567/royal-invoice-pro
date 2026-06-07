@@ -26,7 +26,7 @@ const Index = () => {
   const [billDate, setBillDate] = useState(todayStr());
   const [billNo, setBillNo] = useState(getInitialBillNo);
   const [items, setItems] = useState<InvoiceItem[]>([
-    { id: crypto.randomUUID(), particulars: '', size: '', no: 0, sqft: 0, rate: 0 },
+    { id: crypto.randomUUID(), particulars: '', size: '', length: '', width: '', no: 0, sqft: 0, rate: 0 },
   ]);
   const [gstEnabled, setGstEnabled] = useState(false);
   const [gstPercent, setGstPercent] = useState(18);
@@ -158,7 +158,7 @@ const Index = () => {
     setCustomerPhone('');
     setBillDate(todayStr());
     setBillNo(prev => prev + 1);
-    setItems([{ id: crypto.randomUUID(), particulars: '', size: '', no: 0, sqft: 0, rate: 0 }]);
+    setItems([{ id: crypto.randomUUID(), particulars: '', size: '', length: '', width: '', no: 0, sqft: 0, rate: 0 }]);
     setGstEnabled(false);
     setGstPercent(18);
     setHasCustomerGst(false);

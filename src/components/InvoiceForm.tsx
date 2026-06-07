@@ -1,6 +1,91 @@
+import { useState, useEffect, useRef } from 'react';
 import { Language, t } from '@/lib/translations';
 import { InvoiceItem } from './InvoicePreview';
 import { Plus, Trash2 } from 'lucide-react';
+
+const GRANITE_OPTIONS = [
+  "Asian top granite",
+  "asan green granite",
+  "black galaxy granite",
+  "Safari blue granite",
+  "Black pearl granite",
+  "Lakshmi Red granite",
+  "Sagar Ali granite",
+  "red lapathoro granite",
+  "blue lapathoro granite",
+  "red granite",
+  "red parpari granite",
+  "block per Pari granite",
+  "Steel grey granite",
+  "white granite",
+  "black granite",
+  "plumbing granite",
+  "aasan green granite",
+  "Kadapha",
+  "Araldite paste"
+];
+
+function AutocompleteInput({ value, onChange, options, placeholder, className }: { value: string, onChange: (val: string) => void, options: string[], placeholder: string, className: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    onChange(val);
+    if (val.trim()) {
+      const filtered = options.filter(opt => opt.toLowerCase().includes(val.toLowerCase()));
+      setFilteredOptions(filtered);
+      setIsOpen(true);
+    } else {
+      setFilteredOptions(options);
+      setIsOpen(true);
+    }
+  };
+
+  const handleSelect = (val: string) => {
+    onChange(val);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="relative flex-1 min-w-0" ref={wrapperRef}>
+      <input
+        className={className}
+        placeholder={placeholder}
+        value={value}
+        onChange={handleInputChange}
+        onFocus={() => {
+           setFilteredOptions(value.trim() ? options.filter(opt => opt.toLowerCase().includes(value.toLowerCase())) : options);
+           setIsOpen(true);
+        }}
+      />
+      {isOpen && filteredOptions.length > 0 && (
+        <ul className="absolute z-50 w-full bg-card border border-border rounded-md mt-1 shadow-lg max-h-48 overflow-y-auto">
+          {filteredOptions.map((opt, i) => (
+            <li 
+              key={i} 
+              className="px-3 py-2 text-sm hover:bg-muted cursor-pointer text-foreground"
+              onClick={() => handleSelect(opt)}
+            >
+              {opt}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 interface InvoiceFormProps {
   language: Language;
@@ -37,7 +122,7 @@ const InvoiceForm = ({
 }: InvoiceFormProps) => {
 
   const addRow = () => {
-    setItems([...items, { id: crypto.randomUUID(), particulars: '', size: '', no: 0, sqft: 0, rate: 0 }]);
+    setItems([...items, { id: crypto.randomUUID(), particulars: '', size: '', length: '', width: '', no: 0, sqft: 0, rate: 0 }]);
   };
 
   const removeRow = (id: string) => {
@@ -45,7 +130,37 @@ const InvoiceForm = ({
   };
 
   const updateItem = (id: string, field: keyof InvoiceItem, value: string | number) => {
-    setItems(items.map(item => item.id === id ? { ...item, [field]: value } : item));
+    setItems(items.map(item => {
+      if (item.id === id) {
+        const updatedItem = { ...item, [field]: value };
+        
+        // Auto-calculate sqft if length, width, size or no changes
+        if (field === 'length' || field === 'width' || field === 'no' || field === 'size') {
+          const no = updatedItem.no && updatedItem.no > 0 ? updatedItem.no : 1;
+          
+          if (updatedItem.length || updatedItem.width) {
+            const l = parseFloat(updatedItem.length || '0');
+            const w = parseFloat(updatedItem.width || '0');
+            if (!isNaN(l) && !isNaN(w)) {
+              updatedItem.sqft = Number((l * w * no).toFixed(2));
+            }
+          } else {
+            const sizeStr = String(updatedItem.size || '').trim();
+            const match = sizeStr.toLowerCase().match(/^([\d.]+)\s*[x*]\s*([\d.]+)$/);
+            if (match) {
+              const l = parseFloat(match[1]);
+              const w = parseFloat(match[2]);
+              if (!isNaN(l) && !isNaN(w)) {
+                updatedItem.sqft = Number((l * w * no).toFixed(2));
+              }
+            }
+          }
+        }
+        
+        return updatedItem;
+      }
+      return item;
+    }));
   };
 
   const inputClass = "w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring";
@@ -99,27 +214,38 @@ const InvoiceForm = ({
             <div key={item.id} className="flex flex-col lg:flex-row gap-3 lg:gap-2 lg:items-start bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 w-full lg:w-auto lg:flex-1">
                 <span className="text-xs text-muted-foreground w-6 shrink-0 lg:mt-2">{idx + 1}.</span>
-                <input
-                  className="flex-1 min-w-0 rounded-md border border-input bg-card px-2 py-1.5 text-sm"
+                <AutocompleteInput
+                  options={GRANITE_OPTIONS}
+                  className="w-full rounded-md border border-input bg-card px-2 py-1.5 text-sm"
                   placeholder={t('particulars', language)}
                   value={item.particulars}
-                  onChange={e => updateItem(item.id, 'particulars', e.target.value)}
+                  onChange={val => updateItem(item.id, 'particulars', val)}
                 />
               </div>
               
-              <div className="flex flex-wrap items-center justify-between gap-3 pl-8 lg:pl-0 w-full lg:w-auto lg:justify-end">
-                <div className="flex items-center gap-2 flex-1 lg:flex-none min-w-[140px] lg:min-w-0">
-                  <input
-                    type="text"
-                    className="w-16 sm:w-20 lg:w-20 rounded-md border border-input bg-card px-2 py-1.5 text-sm"
-                    placeholder={t('size', language)}
-                    value={item.size || ''}
-                    onChange={e => updateItem(item.id, 'size', e.target.value)}
-                  />
+              <div className="flex flex-col lg:flex-row items-end lg:items-center justify-between gap-3 pl-8 lg:pl-0 w-full lg:w-auto lg:justify-end">
+                <div className="grid grid-cols-2 sm:grid-cols-5 lg:flex items-center gap-2 w-full lg:w-auto">
+                  <div className="flex items-center gap-1 col-span-2 sm:col-span-2 lg:w-auto">
+                    <input
+                      type="text"
+                      className="w-full lg:w-16 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-center"
+                      placeholder="L"
+                      value={item.length || ''}
+                      onChange={e => updateItem(item.id, 'length', e.target.value)}
+                    />
+                    <span className="text-muted-foreground text-xs font-bold">*</span>
+                    <input
+                      type="text"
+                      className="w-full lg:w-16 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-center"
+                      placeholder="W"
+                      value={item.width || ''}
+                      onChange={e => updateItem(item.id, 'width', e.target.value)}
+                    />
+                  </div>
                   <input
                     type="number"
                     min="0"
-                    className="w-16 sm:w-16 lg:w-16 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
+                    className="w-full lg:w-16 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right sm:col-span-1"
                     placeholder={t('no', language)}
                     value={item.no || ''}
                     onChange={e => updateItem(item.id, 'no', Math.max(0, Number(e.target.value)))}
@@ -127,29 +253,28 @@ const InvoiceForm = ({
                   <input
                     type="number"
                     min="0"
-                    className="w-16 sm:w-20 lg:w-16 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
+                    className="w-full lg:w-16 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right sm:col-span-1"
                     placeholder={t('sqft', language)}
                     value={item.sqft || ''}
                     onChange={e => updateItem(item.id, 'sqft', Math.max(0, Number(e.target.value)))}
                   />
-                  <span className="text-muted-foreground text-xs font-medium px-1 lg:hidden">×</span>
                   <input
                     type="number"
                     min="0"
-                    className="w-20 sm:w-24 lg:w-24 flex-1 lg:flex-none rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right"
+                    className="w-full lg:w-24 rounded-md border border-input bg-card px-2 py-1.5 text-sm text-right col-span-2 sm:col-span-1"
                     placeholder={t('rate', language)}
                     value={item.rate || ''}
                     onChange={e => updateItem(item.id, 'rate', Math.max(0, Number(e.target.value)))}
                   />
                 </div>
                 
-                <div className="flex items-center gap-3 lg:gap-2">
-                  <div className="min-w-[80px] lg:w-24 text-right text-sm font-bold lg:font-medium lg:mt-2 text-foreground">
+                <div className="flex items-center justify-between lg:justify-end gap-3 w-full lg:w-auto mt-2 lg:mt-0 pt-2 lg:pt-0 border-t border-border lg:border-t-0">
+                  <div className="text-sm font-bold lg:font-medium lg:mt-2 text-foreground text-right flex-1 lg:flex-none lg:w-24">
                     ₹{((item.sqft && item.sqft > 0 ? item.sqft : (item.no && item.no > 0 ? item.no : 0)) * (item.rate || 0)).toLocaleString('en-IN')}
                   </div>
                   <button
                     onClick={() => removeRow(item.id)}
-                    className="p-1.5 lg:p-1 lg:mt-1 text-destructive hover:bg-destructive/10 rounded transition-colors"
+                    className="p-1.5 lg:p-1 lg:mt-1 text-destructive hover:bg-destructive/10 rounded transition-colors shrink-0"
                     disabled={items.length <= 1}
                   >
                     <Trash2 className="w-4 h-4" />
